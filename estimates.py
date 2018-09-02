@@ -99,8 +99,8 @@ def calculate_Ue_to_UB_kino2014(nu_ssa_ghz, theta_obs_mas, flux_nu_ssa_obs_jy,
 def calculate_B_zdzr2015(h_u, nu1_u, nu2_u, z, delta, dr_core_ang_u, hoangle_rad,
                          theta_los_rad, flux_u, p):
     """
-    Calculate B using (8) from paper. Arguments with ``u`` postfix are values
-    with units:
+    Calculate B using (8) from paper Zdziarski et al. 2015 (10.1093/mnras/stv986).
+    Arguments with ``u`` postfix are values with units:
 
     >>> import astropy.units as u
     >>> flux_u = 1.0*u.Jy
