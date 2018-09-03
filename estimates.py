@@ -96,6 +96,66 @@ def calculate_Ue_to_UB_kino2014(nu_ssa_ghz, theta_obs_mas, flux_nu_ssa_obs_jy,
            flux_nu_ssa_obs_jy**(p+6) * (delta / (1+z))**(-p-5)
 
 
+def calculate_B_marscher(nu_ssa_ghz, theta_obs_mas, flux_extrapol_nu_ssa_obs_jy,
+                         delta, z, p):
+    """
+    Calculate B using (2) from Marscher 1983 (1983ApJ...264..296M).
+
+   :param nu_ssa_ghz:
+        Frequency of observation (it is SSA frequency for radio core).
+    :param theta_obs_mas:
+        Width of the VLBI core (see paper for discussion).
+    :param flux_extrapol_nu_ssa_obs_jy:
+        Core flux density extrapolated from optical thin spectrum [Jy].
+    :param delta:
+        Doppler factor.
+    :param z:
+        Redshift.
+    :param p:
+        Exponent of particles energy distribution. Must be 1.5, 2.0, 2.5 or 3.
+
+    :return:
+        Value of B [G].
+    """
+    if p not in (2.5, 3.0, 3.5):
+        raise Exception("p must be 1.5, 2.0, 2.5 or 3")
+    alpha = (p-1.0)/2
+    b = {0.25: 1.8, 0.5: 3.2, 0.75: 3.6, 1.0: 3.8}
+    return 10**(-5)*b[alpha] * theta_obs_mas**4 * nu_ssa_ghz**5 *\
+           flux_extrapol_nu_ssa_obs_jy**(-2) * delta / (1+z)
+
+
+def calculate_Ke_marscher(nu_ssa_ghz, theta_obs_mas, flux_extrapol_nu_ssa_obs_jy,
+                         delta, z, p):
+    """
+    Calculate Ke using (3) from Marscher 1983 (1983ApJ...264..296M).
+
+   :param nu_ssa_ghz:
+        Frequency of observation (it is SSA frequency for radio core).
+    :param theta_obs_mas:
+        Width of the VLBI core (see paper for discussion).
+    :param flux_extrapol_nu_ssa_obs_jy:
+        Core flux density extrapolated from optical thin spectrum [Jy].
+    :param delta:
+        Doppler factor.
+    :param z:
+        Redshift.
+    :param p:
+        Exponent of particles energy distribution. Must be 1.5, 2.0, 2.5 or 3.
+
+    :return:
+        Value of B [G].
+    """
+    if p not in (2.5, 3.0, 3.5):
+        raise Exception("p must be 1.5, 2.0, 2.5 or 3")
+    alpha = (p-1.0)/2
+    n = {0.25: 7.9, 0.5: 0.27, 0.75: 0.012, 1.0: 0.00059}
+    D_L_Gpc = WMAP9.luminosity_distance(z).to(u.Gpc).value
+    return n[alpha] * D_L_Gpc**(-1) ** theta_obs_mas**(-4*alpha-7.0) *\
+           nu_ssa_ghz**(-4*alpha-5.0) * flux_extrapol_nu_ssa_obs_jy**(2*alpha+3.0) *\
+           (1+z)**(2*alpha+6.0) * delta*(-2*alpha-4.0)
+
+
 def calculate_B_zdzr2015(h_u, nu1_u, nu2_u, z, delta, dr_core_ang_u, hoangle_rad,
                          theta_los_rad, flux_u, p):
     """
