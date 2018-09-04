@@ -201,3 +201,27 @@ def calculate_B_zdzr2015(h_u, nu1_u, nu2_u, z, delta, dr_core_ang_u, hoangle_rad
     result = (D_L * delta * (const.h/const.m_e)**7 / (h_u*((1+z)*np.sin(theta_los_rad))**3*const.c**12) *
               (2*np.pi*(const.m_e**2*const.c**3/(const.e.gauss*const.h)) * dr_core_ang_u / (nu1_u**(-1) - nu2_u**(-1)))**5 * (const.alpha*c1[p]*c3[p]*np.tan(hoangle_rad)/(flux_u*24*np.pi**3*c2[p]))**2).cgs
     return result.value
+
+
+def omega_rnu(shift_mas, nu1_ghz, nu2_ghz, z, k_r):
+    """
+    Core-position offset measure (see Lobanov 1998).
+
+    :param shift_mas:
+        Core shift [mas] between frequencies ``nu1_ghz`` and ``nu2_ghz`` [GHz].
+    """
+    D_L_pc = WMAP9.luminosity_distance(z).to(u.pc).value
+    nu2 = max([nu1_ghz, nu2_ghz])
+    nu1 = min([nu1_ghz, nu2_ghz])
+    return 4.85e-09*shift_mas*D_L_pc*(nu1**(1/k_r)*nu2**(1/k_r)/(nu2**(1/k_r)-nu1**(1/k_r)))/(1+z)**2
+
+
+def r_core(nu_ghz, theta_rad, shift_mas, nu1_ghz, nu2_ghz, z, k_r):
+    """
+    Distance of the core from jet apex [pc] at frequency ``nu_ghz`` (see Lobanov
+    1998).
+
+    :param theta_rad:
+        LOS angle [rad]
+    """
+    return (omega_rnu(shift_mas, nu1_ghz, nu2_ghz, z, k_r)/np.sin(theta_rad))*nu_ghz**(-1/k_r)
