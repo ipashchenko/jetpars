@@ -225,3 +225,51 @@ def r_core(nu_ghz, theta_rad, shift_mas, nu1_ghz, nu2_ghz, z, k_r):
         LOS angle [rad]
     """
     return (omega_rnu(shift_mas, nu1_ghz, nu2_ghz, z, k_r)/np.sin(theta_rad))*nu_ghz**(-1/k_r)
+
+
+def calculate_B_lobanov(shift_mas, nu1_ghz, nu2_ghz, delta, ho_angle_deg, LOS_angle_deg, z):
+    """
+    Returns magnetic fields [G] at 1 pc, at core positions and core distances [pc].
+    See formula (5) from O'Sullivan & Gabuzda 2009. Approach of Lobanov 1998.
+
+    :param shift_mas:
+        Core shift [mas]
+    :param nu1_ghz:
+        Frequency [GHz]
+    :param nu2_ghz:
+        Frequency [GHz]
+    :param delta:
+        Doppler factor.
+    :param ho_angle_deg:
+        Half-opening angle [deg].
+    :param LOS_angle_deg:
+        LOS angle [deg].
+    :param z:
+        Redshift.
+    :return:
+        Dictionary with results.
+    """
+    Omega = omega_rnu(shift_mas, nu1_ghz, nu2_ghz, z, 1.0)
+    r_c_1 = r_core(nu1_ghz, np.deg2rad(LOS_angle_deg), shift_mas, nu1_ghz, nu2_ghz, z, 1.0)
+    r_c_2 = r_core(nu2_ghz, np.deg2rad(LOS_angle_deg), shift_mas, nu1_ghz, nu2_ghz, z, 1.0)
+    B_1 = 0.025*(Omega**3 * (1 + z)**2 / (delta**2 * np.deg2rad(ho_angle_deg) * np.sin(np.deg2rad(LOS_angle_deg))**2))**0.25
+    B_c1 = B_1 / r_c_1
+    B_c2 = B_1 / r_c_2
+    return {"B1": B_1, "B_core_1": B_c1, "B_core_2": B_c2, "r_core_1": r_c_1, "r_core_2": r_c_2}
+
+
+if __name__ == "__main__":
+    redshift = 1.0
+    shift_mas = 1.0
+    nu1_ghz = 2.3
+    nu2_ghz = 8.6
+    Gamma = 10
+    LOS_angle_deg = 5.0
+    ho_angle_deg = 0.5
+
+    beta = np.sqrt(Gamma**2 - 1)/Gamma
+    delta = 1./Gamma/(1 - beta*np.cos(np.deg2rad(LOS_angle_deg)))
+
+    res = calculate_B_lobanov(shift_mas, nu1_ghz, nu2_ghz, delta, ho_angle_deg,
+                              LOS_angle_deg, redshift)
+    print(res)
